@@ -23,19 +23,28 @@ class Translation
     CODON_TO_PROTEIN[codens]
   end
 
-  def self.of_rna(rna)    
+  def self.of_rna(strand)    
     expected = []
     rna_contain = []
-    count = rna.length / 3
+    count = strand.length / 3
     
     count.times do
-      rna_contain << rna.slice!(0..2)
+      rna_contain << strand.slice!(0..2)
     end
 
     rna_contain.each do |codons|
-      expected << CODON_TO_PROTEIN[codons] until (codons.include?("UAA") || codons.include?("UAG") || codons.include?("UGA"))
-    end
+      begin
+        if CODON_TO_PROTEIN.keys.include?(codons)
+          if CODON_TO_PROTEIN[codons] == "STOP"
+            break
+          end
 
-    return expected
+          expected << CODON_TO_PROTEIN[codons]
+          return expected
+        end
+      rescue => exception
+        raise TranslationTest::InvalidCodonError
+      end      
+    end    
   end
 end
